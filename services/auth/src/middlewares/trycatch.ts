@@ -4,7 +4,7 @@ const TryCatch = (handler: RequestHandler): RequestHandler => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try{
             await handler(req, res, next);
-        } catch (err: any) {
+        } catch (err: any) {                             
             res.status(500).json({
                 message: err.message,
             });
@@ -13,6 +13,7 @@ const TryCatch = (handler: RequestHandler): RequestHandler => {
 };
 
 export default TryCatch;
+
 
 
 
@@ -35,3 +36,33 @@ export default TryCatch;
 
 //Await: await is used inside an async function, it means Pause this
 //  function until the promise finishes..
+
+//this file is NOT defining a route handler, It is defining a:
+//✅ handler wrapper (middleware factory)
+
+
+
+
+
+
+// Line1:import { Request, Response, RequestHandler, NextFunction } from "express";
+
+// These are TypeScript types — they don’t run at runtime.
+// They tell TypeScript:
+// a. what a request object looks like
+// b. what a response object looks like
+// c. what middleware should return
+
+
+
+//Line2: Wrapper function declaration
+//const TryCatch = (handler: RequestHandler): RequestHandler => {
+// This says:
+// 👉 TryCatch accepts a route handler or middleware
+// Example input: async handler(req, res) { … }
+// And it promises to return:
+// 👉 another valid Express middleware.
+// So this function is a:✅ higher-order function(meaning it works on other functions)
+
+
+ 

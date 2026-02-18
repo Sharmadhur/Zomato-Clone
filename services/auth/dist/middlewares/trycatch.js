@@ -24,3 +24,11 @@ export default TryCatch;
 // asynchronous work and automatically return a Promise.
 //Await: await is used inside an async function, it means Pause this
 //  function until the promise finishes..
+//this file is NOT defining a route handler, It is defining a:
+//✅ handler wrapper (middleware factory)
+// Line1:import { Request, Response, RequestHandler, NextFunction } from "express";
+// These are TypeScript types — they don’t run at runtime.
+// They tell TypeScript:
+// a. what a request object looks like
+// b. what a response object looks like
+// c. what middleware should return
