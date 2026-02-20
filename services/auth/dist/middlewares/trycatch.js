@@ -32,3 +32,11 @@ export default TryCatch;
 // a. what a request object looks like
 // b. what a response object looks like
 // c. what middleware should return
+//Line2: Wrapper function declaration
+//const TryCatch = (handler: RequestHandler): RequestHandler => {
+// This says:
+// 👉 TryCatch accepts a route handler or middleware
+// Example input: async handler(req, res) { … }
+// And it promises to return:
+// 👉 another valid Express middleware.
+// So this function is a:✅ higher-order function(meaning it works on other functions)
