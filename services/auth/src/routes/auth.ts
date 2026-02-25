@@ -15,4 +15,4 @@ export default router;
 
 // express → web framework
 // addUserRole & loginUser → controller functions that handle the logic for specific routes
-// isAuth → middleware to check if user is authenticated
+// isAuth → middleware to check if user is authenticated  

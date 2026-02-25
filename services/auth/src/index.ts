@@ -30,6 +30,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoute);
 
+// If .env has PORT → use it
+// Else → default to 5000
 const PORT = Number(process.env.PORT) || 5000;
 
 

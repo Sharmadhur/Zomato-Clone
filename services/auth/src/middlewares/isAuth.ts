@@ -39,7 +39,7 @@ Promise<void> =>{
         req.user = decodedValue.user;
         next();
     } catch(error) {
-        res.status(500).json({
+        res.status(401).json({
             message: "Please Login - Jwt error",
         });
     }
