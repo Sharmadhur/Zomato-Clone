@@ -18,6 +18,8 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 app.use("/api/auth", authRoute);
+// If .env has PORT → use it
+// Else → default to 5000
 const PORT = Number(process.env.PORT) || 5000;
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Auth service is running on port ${PORT}`);
