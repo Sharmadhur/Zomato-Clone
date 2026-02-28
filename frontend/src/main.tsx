@@ -7,6 +7,7 @@ import { AppProvider } from './context/AppContext.tsx';
 
 
 export const authService = "https://orange-space-acorn-x5v4qr59prg7fvgwq-5000.app.github.dev/api/auth";
+export const restaurantService = "https://orange-space-acorn-x5v4qr59prg7fvgwq-5001.app.github.dev/";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
