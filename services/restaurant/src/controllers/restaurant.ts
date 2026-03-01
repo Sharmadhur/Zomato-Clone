@@ -50,24 +50,39 @@ export const addRestaurant = TryCatch(
       });
     }
 
-    const { data: uploadResult } = await axios.post(
-      `${process.env.UTILS_SERVICE}/api/upload`,
-      {
-        buffer: fileBuffer.content,
-      },
-    );
+    //================================================================
 
+    let finalUploadResult; // 1. Declare it here (outside)
+
+    try {
+      // 2. Remove "const { data: uploadResult }" and just assign it
+      const { data } = await axios.post(
+        `${process.env.UTILS_SERVICE}/api/upload`,
+        { buffer: fileBuffer.content },
+      );
+      finalUploadResult = data;
+      console.log("Upload Success:", finalUploadResult.url);
+    } catch (error: any) {
+      console.error("Utils Service Error:", error.message);
+      return res.status(500).json({
+        message: "Image upload service unreachable",
+        error: error.message,
+      });
+    }
+
+    // 3. Now this will work and the red underline will go away!
     const restaurant = await Restaurant.create({
       name,
       description,
       phone,
-      image: uploadResult.url,
+      image: finalUploadResult.url,
       ownerId: user._id,
       autoLocation: {
         type: "Point",
         coordinates: [Number(longitude), Number(latitude)],
         formattedAddress,
       },
+      isVerified: false,
     });
 
     return res.status(201).json({
@@ -88,8 +103,8 @@ export const fetchMyRestaurant = TryCatch(
     const restaurant = await Restaurant.findOne({ ownerId: req.user._id });
 
     if (!restaurant) {
-      return res.status(400).json({
-        message: "No Restaurant Found",
+      return res.status(200).json({
+        restaurant: null,
       });
     }
 
@@ -98,21 +113,18 @@ export const fetchMyRestaurant = TryCatch(
         {
           user: {
             ...req.user,
-            restaurntId: restaurant._id,
+            restaurantId: restaurant._id,
           },
         },
         process.env.JWT_SEC as string,
         {
-          expiresIn: "15",
+          expiresIn: "15d",
         },
       );
 
-      return res.json({ restaurant, token});
+      return res.json({ restaurant, token });
     }
 
     res.json({ restaurant });
-  }
+  },
 );
-
-
-

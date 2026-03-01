@@ -3,7 +3,7 @@ import { useAppData } from "../context/AppContext";
 import toast from "react-hot-toast";
 import { restaurantService } from "../main";
 import axios from "axios";
-import { BiUpload } from "react-icons/bi";
+import { BiMapPin, BiUpload } from "react-icons/bi";
 
 const AddRestaurant = () => {
     const [name, setName] = useState("");
@@ -32,7 +32,7 @@ const AddRestaurant = () => {
 
         try {
             setSubmitting(true);
-            await axios.post(`${restaurantService}/api/restaurant/new`, formData, {
+            await axios.post(`${restaurantService}api/restaurant/new`, formData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
@@ -76,8 +76,26 @@ const AddRestaurant = () => {
              text-sm text-gray-600 hover:bg-gray-50">
                 <BiUpload className="h-5 w-5 text-red-500"/>
                 {image ? image.name : "Upload restaurant image"}
-             </label>
+                <input 
+                type="file" 
+                accept="image/*" 
+                hidden
+                onChange={e => setImage(e.target.files?.[0] || null )} 
+                />
+            </label>
 
+            <div className="flex items-start gap-3 rounded-lg border p-4">
+                <BiMapPin className = "mt-0.5 h-5 w-5 text-red-500" />
+                <div className="text-sm">
+                    {loadingLocation 
+                      ? "Fetching your location..."
+                      : location?.formattedAddress || "Location not available"}
+                </div>
+            </div>
+
+            <button className="w-full rounded-lg py-3 text-sm font-semibold text-white bg-[#e23744]" disabled={submitting} onClick={handleSubmit}>
+                {submitting ? "Submitting..." : "Add Restaurant"}
+            </button>
         </div>
     </div>
  );

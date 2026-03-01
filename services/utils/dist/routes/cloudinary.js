@@ -8,15 +8,19 @@ const cloudinary_1 = __importDefault(require("cloudinary"));
 const router = express_1.default.Router();
 router.post("/upload", async (req, res) => {
     try {
+        console.log("Received upload request, buffer exists:", !!req.body.buffer);
         const { buffer } = req.body;
-        const cloud = await cloudinary_1.default.v2.uploader.upload(buffer);
-        res.json({
-            url: cloud.secure_url,
+        const result = await cloudinary_1.default.v2.uploader.upload(buffer, {
+            resource_type: "image", // safer than "auto"
         });
+        console.log("Upload success:", result.secure_url);
+        res.json({ url: result.secure_url });
     }
-    catch (error) {
+    catch (err) {
+        console.error("Cloudinary REAL error:", err);
         res.status(500).json({
-            message: error.message,
+            message: "Cloudinary upload failed",
+            error: err.message,
         });
     }
 });

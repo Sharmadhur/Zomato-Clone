@@ -12,8 +12,10 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"] // MUST include Authorization
 }));
+app.options(/.*/, cors());
 app.use((req, res, next) => {
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none"); // Change from same-origin-allow-popups
+    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
     next();
 });
 app.use(express.json());

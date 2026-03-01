@@ -10,7 +10,13 @@ const restaurant_js_1 = __importDefault(require("./routes/restaurant.js"));
 const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: (origin, callback) => callback(null, true),
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+app.options(/.*/, (0, cors_1.default)());
 app.use(express_1.default.json());
 const PORT = Number(process.env.PORT) || 5001;
 app.use("/api/restaurant", restaurant_js_1.default);

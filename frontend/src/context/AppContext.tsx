@@ -22,17 +22,20 @@ export const AppProvider = ({ children }: AppProviderProps)=>{
     async function fetchUser() {
         try {
             const token = localStorage.getItem("token");
+            if (!token) return; // Don't attempt fetch if no token exists
 
             const { data } = await axios.get(`${authService}/me`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                withCredentials: true, // CRITICAL: This allows CORS cookies/headers
             });
 
             setUser(data);
             setIsAuth(true);
         } catch(error){
-            console.log(error);
+            console.log("Fetch User Error:", error);
+            setIsAuth(false); // Reset state on error
         } finally{
           setLoading(false);
         }
@@ -74,6 +77,7 @@ export const AppProvider = ({ children }: AppProviderProps)=>{
                     "Your Location"
                 );
                 
+                setLoadingLocation(false);
             } catch (error) {
                 setLocation({
                     latitude, 
@@ -81,6 +85,7 @@ export const AppProvider = ({ children }: AppProviderProps)=>{
                     formattedAddress: "Current Location",
                 });
                 setCity("Failed To Load");
+                setLoadingLocation(false);
             }
             {/*...........*/ }
         }, (err) => console.log("Geolocation Error:", err.message)); // ADD ERROR CALLBACK HERE

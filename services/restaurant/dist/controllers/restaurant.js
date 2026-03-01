@@ -42,20 +42,34 @@ exports.addRestaurant = (0, trycatch_js_1.default)(async (req, res) => {
             message: "Failed to create file buffer",
         });
     }
-    const { data: uploadResult } = await axios_1.default.post(`${process.env.UTILS_SERVICE}/api/upload`, {
-        buffer: fileBuffer.content,
-    });
+    //================================================================
+    let finalUploadResult; // 1. Declare it here (outside)
+    try {
+        // 2. Remove "const { data: uploadResult }" and just assign it
+        const { data } = await axios_1.default.post(`${process.env.UTILS_SERVICE}/api/upload`, { buffer: fileBuffer.content });
+        finalUploadResult = data;
+        console.log("Upload Success:", finalUploadResult.url);
+    }
+    catch (error) {
+        console.error("Utils Service Error:", error.message);
+        return res.status(500).json({
+            message: "Image upload service unreachable",
+            error: error.message,
+        });
+    }
+    // 3. Now this will work and the red underline will go away!
     const restaurant = await Restaurant_js_1.default.create({
         name,
         description,
         phone,
-        image: uploadResult.url,
+        image: finalUploadResult.url,
         ownerId: user._id,
         autoLocation: {
             type: "Point",
             coordinates: [Number(longitude), Number(latitude)],
             formattedAddress,
         },
+        isVerified: false,
     });
     return res.status(201).json({
         message: "Restaurant created successfully",
@@ -70,18 +84,18 @@ exports.fetchMyRestaurant = (0, trycatch_js_1.default)(async (req, res) => {
     }
     const restaurant = await Restaurant_js_1.default.findOne({ ownerId: req.user._id });
     if (!restaurant) {
-        return res.status(400).json({
-            message: "No Restaurant Found",
+        return res.status(200).json({
+            restaurant: null,
         });
     }
     if (!req.user.restaurantId) {
         const token = jsonwebtoken_1.default.sign({
             user: {
                 ...req.user,
-                restaurntId: restaurant._id,
+                restaurantId: restaurant._id,
             },
         }, process.env.JWT_SEC, {
-            expiresIn: "15",
+            expiresIn: "15d",
         });
         return res.json({ restaurant, token });
     }
