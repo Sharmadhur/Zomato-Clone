@@ -9,15 +9,20 @@ import Navbar from "./components/navbar";
 import Account from "./pages/Account";
 import { useAppData } from "./context/AppContext";
 import Restaurant from "./pages/Restaurant";
-
+import RestaurantPage from "./pages/RestaurantPage";
 
 const App = () => {
   const { user } = useAppData();
 
-  if(user && user.role === "seller"){
+  if (user && user.role === "seller") {
     return (
       <>
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+          }}
+        />
         <Restaurant />
       </>
     );
@@ -32,14 +37,14 @@ const App = () => {
           </Route>
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Home />} />
+            <Route path="/restaurant/:id" element={<RestaurantPage />} />
             <Route path="/select-role" element={<SelectRole />} />
             <Route path="/account" element={<Account />} />
           </Route>
         </Routes>
       </BrowserRouter>
-
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

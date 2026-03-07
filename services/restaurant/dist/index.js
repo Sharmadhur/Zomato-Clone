@@ -1,30 +1,27 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const db_js_1 = __importDefault(require("./config/db.js"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const restaurant_js_1 = __importDefault(require("./routes/restaurant.js"));
-const menuitems_js_1 = __importDefault(require("./routes/menuitems.js"));
-const cors_1 = __importDefault(require("cors"));
-const geocode_js_1 = __importDefault(require("./routes/geocode.js"));
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-app.use((0, cors_1.default)({
+import express from "express";
+import connectDB from "./config/db.js";
+import dotenv from "dotenv";
+import restaurantRoutes from "./routes/restaurant.js";
+import itemRoutes from "./routes/menuitems.js";
+import cartRoutes from "./routes/cart.js";
+import cors from 'cors';
+import geocodeRoutes from "./routes/geocode.js";
+dotenv.config();
+const app = express();
+app.use(cors({
     origin: (origin, callback) => callback(null, true),
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
-app.options(/.*/, (0, cors_1.default)());
-app.use(express_1.default.json());
+app.options(/.*/, cors());
+app.use(express.json());
 const PORT = Number(process.env.PORT) || 5001;
-app.use("/api/restaurant", restaurant_js_1.default);
-app.use("/api/item", menuitems_js_1.default);
-app.use("/api/geocode", geocode_js_1.default);
+app.use("/api/restaurant", restaurantRoutes);
+app.use("/api/item", itemRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/geocode", geocodeRoutes);
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Restaurant service is running on port ${PORT}`);
-    (0, db_js_1.default)();
+    connectDB();
 });

@@ -1,21 +1,15 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleMenuItemAvailability = exports.deleteMenuItem = exports.getAllItems = exports.addMenuItem = void 0;
-const trycatch_js_1 = __importDefault(require("../middlewares/trycatch.js"));
-const datauri_js_1 = __importDefault(require("../config/datauri.js"));
-const Restaurant_js_1 = __importDefault(require("../models/Restaurant.js"));
-const axios_1 = __importDefault(require("axios"));
-const MenuItems_js_1 = __importDefault(require("../models/MenuItems.js"));
-exports.addMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
+import TryCatch from "../middlewares/trycatch.js";
+import getBuffer from "../config/datauri.js";
+import Restaurant from "../models/Restaurant.js";
+import axios from "axios";
+import MenuItems from "../models/MenuItems.js";
+export const addMenuItem = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
             message: "Please Login",
         });
     }
-    const restaurant = await Restaurant_js_1.default.findOne({ ownerId: req.user._id });
+    const restaurant = await Restaurant.findOne({ ownerId: req.user._id });
     if (!restaurant) {
         return res.status(404).json({
             message: "NO Restaurant found",
@@ -33,7 +27,7 @@ exports.addMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
             message: "Please give image",
         });
     }
-    const fileBuffer = (0, datauri_js_1.default)(file);
+    const fileBuffer = getBuffer(file);
     if (!fileBuffer?.content) {
         return res.status(500).json({
             message: "Failed to create file buffer",
@@ -43,7 +37,7 @@ exports.addMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
     let finalUploadResult; // 1. Declare it here (outside)
     try {
         // 2. Remove "const { data: uploadResult }" and just assign it
-        const { data } = await axios_1.default.post(`${process.env.UTILS_SERVICE}/api/upload`, { buffer: fileBuffer.content });
+        const { data } = await axios.post(`${process.env.UTILS_SERVICE}/api/upload`, { buffer: fileBuffer.content });
         finalUploadResult = data;
         console.log("Upload Success:", finalUploadResult.url);
     }
@@ -54,7 +48,7 @@ exports.addMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
             error: error.message,
         });
     }
-    const item = await MenuItems_js_1.default.create({
+    const item = await MenuItems.create({
         name,
         description,
         price,
@@ -66,17 +60,17 @@ exports.addMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
         item,
     });
 });
-exports.getAllItems = (0, trycatch_js_1.default)(async (req, res) => {
+export const getAllItems = TryCatch(async (req, res) => {
     const { id } = req.params;
     if (!id) {
         return res.status(400).json({
             message: "Id is required",
         });
     }
-    const items = await MenuItems_js_1.default.find({ restaurantId: id });
+    const items = await MenuItems.find({ restaurantId: id });
     res.json(items);
 });
-exports.deleteMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
+export const deleteMenuItem = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
             message: "Please Login",
@@ -88,13 +82,13 @@ exports.deleteMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
             message: "Id is required",
         });
     }
-    const item = await MenuItems_js_1.default.findById(itemId);
+    const item = await MenuItems.findById(itemId);
     if (!item) {
         return res.status(404).json({
             message: "No Item Found",
         });
     }
-    const restaurant = await Restaurant_js_1.default.findOne({
+    const restaurant = await Restaurant.findOne({
         _id: item.restaurantId,
         ownerId: req.user._id,
     });
@@ -108,7 +102,7 @@ exports.deleteMenuItem = (0, trycatch_js_1.default)(async (req, res) => {
         message: "Menu item deleted successfully",
     });
 });
-exports.toggleMenuItemAvailability = (0, trycatch_js_1.default)(async (req, res) => {
+export const toggleMenuItemAvailability = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
             message: "Please Login",
@@ -120,13 +114,13 @@ exports.toggleMenuItemAvailability = (0, trycatch_js_1.default)(async (req, res)
             message: "Id is required",
         });
     }
-    const item = await MenuItems_js_1.default.findById(itemId);
+    const item = await MenuItems.findById(itemId);
     if (!item) {
         return res.status(404).json({
             message: "No Item Found",
         });
     }
-    const restaurant = await Restaurant_js_1.default.findOne({
+    const restaurant = await Restaurant.findOne({
         _id: item.restaurantId,
         ownerId: req.user._id,
     });

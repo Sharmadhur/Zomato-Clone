@@ -1,5 +1,13 @@
 import type {IMenuItem} from "../types";
 import { useState, useEffect } from "react";
+import { BsEye } from "react-icons/bs";
+import { FiEyeOff } from "react-icons/fi";
+import { BiTrash } from "react-icons/bi";
+import {VscLoading} from "react-icons/vsc";
+import axios from "axios";
+import { BsCartPlus } from "react-icons/bs";
+import { restaurantService } from "../main";
+import {toast} from "react-hot-toast";
 
 interface MenuItemsProps{
   items: IMenuItem[];
@@ -10,15 +18,62 @@ interface MenuItemsProps{
 
 const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
 
-  const [loadingItemId, setLoadingItemId] = useState<String | null>(null)
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+
+  const handleDelete = async(itemId:string) => {
+    const confirm = window.confirm("Are you sure you want to delete this item");
+    if(!confirm) return 
+
+    try {
+      const {data} = await axios.put(`${restaurantService}api/item/status/${itemId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+      });
+
+      toast.success(data.message);
+      onItemDeleted()
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update status");
+    }
+  };
+
+
+
+  const toggleAvailability = async (itemId: string) => {
+  try {
+    setLoadingItemId(itemId);
+    const { data } = await axios.put(
+      `${restaurantService}api/item/status/${itemId}`, 
+      {}, 
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+    toast.success(data.message || "Status updated");
+    onItemDeleted();
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to update status");
+  } finally {
+    setLoadingItemId(null);
+  }
+};
+
+
+
+
   return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3
   lg:grid-cols-4">{
     items.map((item) => {
       const isLoading = loadingItemId === item._id;
       return (
-        <div className={`relative flex gap-4 rounded-lg bg-white p-4 shadow-sm transition ${
+        <div key={item._id} className={`relative flex gap-4 rounded-lg bg-white p-4 shadow-sm transition ${
           !item.isAvailable ? "opacity-70" : ""
-        }`}>
+        }`}
+        key = {item._id}
+        >
 
           <div className="relative shrink-0">
             <img 
@@ -36,7 +91,7 @@ const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
                 )
               }
           </div>
-          <div className="flex flex-1 flex-col jsutify-between">
+          <div className="flex flex-1 flex-col justify-between">
             <div>
               <h3 className="font-semibold">{item.name}</h3>
               {
@@ -44,6 +99,45 @@ const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
                   <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
                 )
               }
+            </div>
+
+            <div className="flex items-center justify-between ">
+              <p className="font-medium">₹{item.price}</p>
+              {
+                isSeller && (<div className="flex gap-2">
+                  <button 
+                    onClick={()=>toggleAvailability(item._id)}
+                    className="rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+                    >
+                      {item.isAvailable ? 
+                        <BsEye size={18}/>
+                       : 
+                        <FiEyeOff size={18}/>
+                      }
+                    </button>
+
+                    <button
+                      onClick={()=>handleDelete(item._id)}
+                      className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                    >
+                      <BiTrash size={18} />
+                    </button>
+                </div>)
+              }
+
+              {!isSeller && (
+                  <button
+                    disabled={!item.isAvailable || isLoading}
+                    onClick={() => {}}
+                    className={`flex items-center justify-center rounded-lg p-2 ${
+                      !item.isAvailable || isLoading 
+                        ? "cursor-not-allowed text-gray-400"
+                        : "text-red-500 hover:bg-red-50"
+                    }`}
+                  >
+                    {isLoading ? <VscLoading size={18} className="animate-spin"/> : <BsCartPlus size={18}/>}
+                  </button>
+              )}
             </div>
           </div>
         </div>

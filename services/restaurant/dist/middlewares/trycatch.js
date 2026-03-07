@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const TryCatch = (handler) => {
     return async (req, res, next) => {
         try {
@@ -12,7 +10,7 @@ const TryCatch = (handler) => {
         }
     };
 };
-exports.default = TryCatch;
+export default TryCatch;
 // This code creates a reusable wrapper that executes async
 //  Express handlers inside a try/catch block, automatically 
 //  catching errors and returning a structured HTTP response 
