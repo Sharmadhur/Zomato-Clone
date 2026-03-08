@@ -1,5 +1,5 @@
 import type {IMenuItem} from "../types";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { BsEye } from "react-icons/bs";
 import { FiEyeOff } from "react-icons/fi";
 import { BiTrash } from "react-icons/bi";
@@ -8,6 +8,7 @@ import axios from "axios";
 import { BsCartPlus } from "react-icons/bs";
 import { restaurantService } from "../main";
 import {toast} from "react-hot-toast";
+import { useAppData } from "../context/AppContext";
 
 interface MenuItemsProps{
   items: IMenuItem[];
@@ -25,7 +26,9 @@ const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
     if(!confirm) return 
 
     try {
-      const {data} = await axios.put(`${restaurantService}api/item/status/${itemId}`, {
+      const {data} = await axios.put(`${restaurantService}api/item/status/${itemId}`, 
+        {}, 
+        {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
         },
@@ -56,10 +59,35 @@ const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
   } catch (error) {
     console.error(error);
     toast.error("Failed to update status");
-  } finally {
+  } 
+};
+
+
+const {fetchCart} = useAppData()
+
+const addToCart = async(restaurantId: string, itemId: string)=>{
+  try {
+    setLoadingItemId(itemId);
+
+    const {data} = await axios.post(`${restaurantService}api/cart/add`,{
+      restaurantId, itemId,
+    },
+    {
+      headers:{
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+    );
+    toast.success(data.message);
+    fetchCart();
+  } catch (error: any) {
+    console.error("Cart Error:", error);
+    const errorMessage = error.response?.data?.message || "Could not connect to server";
+    toast.error(errorMessage);
+  }finally{
     setLoadingItemId(null);
   }
-};
+}
 
 
 
@@ -72,7 +100,6 @@ const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
         <div key={item._id} className={`relative flex gap-4 rounded-lg bg-white p-4 shadow-sm transition ${
           !item.isAvailable ? "opacity-70" : ""
         }`}
-        key = {item._id}
         >
 
           <div className="relative shrink-0">
@@ -128,7 +155,7 @@ const MenuItems = ({items, onItemDeleted, isSeller}: MenuItemsProps) => {
               {!isSeller && (
                   <button
                     disabled={!item.isAvailable || isLoading}
-                    onClick={() => {}}
+                    onClick={() => addToCart(item.restaurantId, item._id)}
                     className={`flex items-center justify-center rounded-lg p-2 ${
                       !item.isAvailable || isLoading 
                         ? "cursor-not-allowed text-gray-400"

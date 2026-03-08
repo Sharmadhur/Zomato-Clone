@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from "react";
 import { authService, restaurantService } from "../main";
-import type { AppContextType, LocationData, User } from "../types";
-import { Toaster } from "react-hot-toast";
+import type { AppContextType, LocationData, User, ICart } from "../types";
+import { Toaster, toast } from "react-hot-toast";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -52,17 +52,17 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [quantity, setQuantity] = useState(0);
 
   async function fetchCart() {
-    if(!user || user.role !== "customer") return;
+    if (!user || user.role !== "customer") return;
 
     try {
-      const {data} = await axios.get(`${restaurantService}api/cart/all`,{
+      const { data } = await axios.get(`${restaurantService}api/cart/all`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
       setCart(data.cart || []);
-      setSubTotal(data.subTotal || 0);
+      setSubTotal(data.subTotal || data.subtotal || 0);
       setQuantity(data.cartLength);
     } catch (error) {
       console.log(error);
@@ -73,16 +73,21 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     fetchUser();
   }, []);
 
-
   useEffect(() => {
-    if( user && user.role === "customer"){
-    fetchCart();
-  }
+    if (user && user.role === "customer") {
+      fetchCart();
+    }
   }, [user]);
 
   useEffect(() => {
-    if (!navigator.geolocation)
-      return alert("Please Allow Location to continue");
+    if (location || loadingLocation) return;
+    if (!navigator.geolocation) {
+      alert(
+        "Geolocation is not supported by your browser. Please Allow Location to continue",
+      );
+      return;
+    }
+
     setLoadingLocation(true);
 
     navigator.geolocation.getCurrentPosition(
@@ -101,6 +106,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             formattedAddress: data.display_name || "current location",
           });
 
+          const addr = data.address || {};
           setCity(
             data.address.city ||
               data.address.town ||
@@ -109,23 +115,26 @@ export const AppProvider = ({ children }: AppProviderProps) => {
               "Your Location",
           );
 
-          setLoadingLocation(false);
+          // setLoadingLocation(false);
         } catch (error) {
-          console.warn("Could not fetch location via backend proxy:", error);
+          console.warn("Geocode proxy error:", error);
+          setCity("Location Error");
           setLocation({
             latitude,
             longitude,
-            formattedAddress: "Current Location",
+            formattedAddress: "Manual Location Needed",
           });
-          setCity("Failed To Load");
+        } finally {
           setLoadingLocation(false);
         }
-        {
-          /*...........*/
-        }
       },
-      (err) => console.log("Geolocation Error:", err.message),
-    ); // ADD ERROR CALLBACK HERE
+      (err) => {
+        console.error("Geolocation Permission Error:", err.message);
+        setCity("Permission Denied");
+        setLoadingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
   }, []);
 
   return (
@@ -140,7 +149,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         location,
         loadingLocation,
         city,
-        cart, 
+        cart,
         fetchCart,
         quantity,
         subTotal,
