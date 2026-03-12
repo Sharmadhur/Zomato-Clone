@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import restaurantRoutes from "./routes/restaurant.js";
 import itemRoutes from "./routes/menuitems.js";
 import cartRoutes from "./routes/cart.js";
+import addressRoutes from "./routes/address.js";
 import cors from 'cors';
 import geocodeRoutes from "./routes/geocode.js";
 dotenv.config();
@@ -21,6 +22,7 @@ app.use("/api/restaurant", restaurantRoutes);
 app.use("/api/item", itemRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/geocode", geocodeRoutes);
+app.use("/api/address", addressRoutes);
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Restaurant service is running on port ${PORT}`);
     connectDB();

@@ -198,16 +198,18 @@ const Cart = () => {
 
         <button 
             onClick={checkout}
-            className="mt-3 w-full rounded-lg bg-[#E23744] py-3 text-sm font-semibold
-        text-white hover:bg-red=800">
-            Proceed To Checkout
+            className={`mt-3 w-full rounded-lg bg-[#E23744] py-3 text-sm font-semibold
+        text-white hover:bg-red=800 ${!restaurant.isOpen ? "opacity-50 cursor-not-allowed" : ""}`}
+        disabled={!restaurant.isOpen}
+        >
+            {!restaurant.isOpen ? "Restaurant is closed" : "Proceed To Checkout"}
         </button>
 
 
         <button 
             onClick={clearCart}
-            className="mt-3 w-full rounded-lg bg-[#7b7979] py-3 text-sm font-semibold
-          text-white hover:bg-gray-500 flex justify-center items-center gap-3"
+            className="mt-3 w-full rounded-lg bg-[#232222] py-3 text-sm font-semibold
+          text-white hover:bg-gray-900 flex justify-center items-center gap-3"
             disabled={clearingCart}
         >
             Clear Cart <TbTrash size={16} />

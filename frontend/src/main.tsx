@@ -4,6 +4,7 @@ import './index.css';
 import App from './App.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AppProvider } from './context/AppContext.tsx';
+import "leaflet/dist/leaflet.css";
 
 
 export const authService = "https://orange-space-acorn-x5v4qr59prg7fvgwq-5000.app.github.dev/api/auth";
